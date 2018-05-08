@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Appello</string>
+    <string name="hint_name">Naam</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Wachtwoord</string>
+    <string name="hint_confirm_password"> Bevestig Wachtwoord</string>
+    <string name="text_login">Login</string>
+    <string name="text_register">Registreer</string>
+    <string name="error_message_name">Geef Volledige Naam In</string>
+    <string name="error_message_email">Geef Geldig Email In</string>
+    <string name="error_message_age">Geef Leeftijd In</string>
+    <string name="error_message_password">Geef Wachtwoord In</string>
+    <string name="success_message">Registratie succesvol</string>
+    <string name="text_not_member">Nog geen account? Registreer hier</string>
+    <string name="text_already_member">Al lid? Login</string>
+    <string name="error_email_exists">Email Bestaat Al</string>
+    <string name="error_password_match">Wachtwoorden Komen Niet Overeen</string>
+    <string name="error_valid_email_password">Verkeerd Email of Wachtwoord</string>
+</resources>
