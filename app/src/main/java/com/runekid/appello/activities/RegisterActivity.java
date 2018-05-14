@@ -12,6 +12,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
 
 import com.runekid.appello.R;
+import com.runekid.appello.helper.AESCrypt;
 import com.runekid.appello.helper.InputValidation;
 import com.runekid.appello.model.User;
 import com.runekid.appello.sql.DBHelper;
@@ -116,7 +117,11 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             user = new User();
             user.setName(textInputEditTextName.getText().toString().trim());
             user.setEmail(textInputEditTextEmail.getText().toString().trim());
-            user.setPassword(textInputEditTextPassword.getText().toString().trim());
+            try {
+                user.setPassword(AESCrypt.encrypt(textInputEditTextPassword.getText().toString().trim()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             dbHelper.addUser(user);
 

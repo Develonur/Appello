@@ -3,9 +3,12 @@ package com.runekid.appello.sql;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import com.runekid.appello.helper.AESCrypt;
 import com.runekid.appello.model.User;
 
 /**
@@ -13,7 +16,7 @@ import com.runekid.appello.model.User;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String DATABASE_NAME = "Appello.db";
 
@@ -87,15 +90,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    public boolean checkUser(String email, String password) {
+    public boolean checkUser(String email, String password){
         String[] columns = {
-                COLUMN_USER_ID
+                COLUMN_USER_ID,
+                COLUMN_USER_NAME,
+                COLUMN_USER_EMAIL,
+                COLUMN_USER_PASSWORD
         };
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String selection = COLUMN_USER_EMAIL + " = ? AND " + COLUMN_USER_PASSWORD + " = ?";
-        String[] selectionArgs = { email, password };
+        String selection = COLUMN_USER_EMAIL + " = ?";
+        String[] selectionArgs = { email };
 
         Cursor cursor = db.query(TABLE_USER,
                 columns,
@@ -105,9 +111,18 @@ public class DBHelper extends SQLiteOpenHelper {
                 null,
                 null);
         int cursorCount = cursor.getCount();
+        String passwordFromDatabase = null;
+        //Log.d("lol", DatabaseUtils.dumpCursorToString(cursor));
+        if (cursor.moveToFirst()) {
+            try {
+                passwordFromDatabase = AESCrypt.decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_USER_PASSWORD)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         cursor.close();
         db.close();
-        if (cursorCount > 0) {
+        if (cursorCount > 0 && passwordFromDatabase.equals(password)) {
             return true;
         }
         return false;
