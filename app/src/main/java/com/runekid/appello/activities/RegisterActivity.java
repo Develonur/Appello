@@ -1,6 +1,7 @@
 package com.runekid.appello.activities;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -9,8 +10,16 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatTextView;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.runekid.appello.R;
 import com.runekid.appello.helper.AESCrypt;
 import com.runekid.appello.helper.InputValidation;
@@ -41,9 +50,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private AppCompatTextView appCompatTextViewLoginLink;
 
     private InputValidation inputValidation;
-    private DBHelper dbHelper;
-    private User user;
 
+
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,6 +82,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         appCompatButtonRegister = (AppCompatButton) findViewById(R.id.appCompatButtonRegister);
 
         appCompatTextViewLoginLink = (AppCompatTextView) findViewById(R.id.appCompatTextViewLoginLink);
+
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private void initListeners() {
@@ -80,7 +92,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void initObjects() {
-        dbHelper = new DBHelper(activity);
         inputValidation = new InputValidation(activity);
     }
 
@@ -88,7 +99,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.appCompatButtonRegister:
-                postDataToSQLite();
+                createAccount();
                 break;
             case R.id.appCompatTextViewLoginLink:
                 finish();
@@ -96,7 +107,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private void postDataToSQLite() {
+    private void createAccount() {
         if (!inputValidation.isInputEditTextFilled(textInputEditTextName,textInputLayoutName,getString(R.string.error_message_name))) {
             return;
         }
@@ -113,24 +124,36 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        if (!dbHelper.checkUser(textInputEditTextEmail.getText().toString().trim())) {
-            user = new User();
-            user.setName(textInputEditTextName.getText().toString().trim());
-            user.setEmail(textInputEditTextEmail.getText().toString().trim());
-            try {
-                user.setPassword(AESCrypt.encrypt(textInputEditTextPassword.getText().toString().trim()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        mAuth.createUserWithEmailAndPassword(textInputEditTextEmail.getText().toString().trim(), textInputEditTextPassword.getText().toString().trim())
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d("CREATE_USER", "createUserWithEmail:onComplete:" + task.isSuccessful());
 
-            dbHelper.addUser(user);
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Snackbar.make(nestedScrollView,getString(R.string.error_email_exists),Snackbar.LENGTH_LONG).show();
+                            Log.e("USER_CREATE_FAIL", "onComplete: Failed=" + task.getException().getMessage());
+                        } else {
+                            // Sign in success
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(textInputEditTextName.getText().toString().trim()).build();
+
+                            user.updateProfile(profileUpdates);
+                            Snackbar.make(nestedScrollView,getString(R.string.success_message),Snackbar.LENGTH_LONG).show();
+                            emptyInputEditText();
+                        }
+
+                        // ...
+                    }
+                });
 
 
-            Snackbar.make(nestedScrollView,getString(R.string.success_message),Snackbar.LENGTH_LONG).show();
-            emptyInputEditText();
-        } else {
-            Snackbar.make(nestedScrollView,getString(R.string.error_email_exists),Snackbar.LENGTH_LONG).show();
-        }
+
     }
 
     private void emptyInputEditText() {
