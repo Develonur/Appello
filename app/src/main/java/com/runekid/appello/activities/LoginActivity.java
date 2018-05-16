@@ -22,6 +22,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.runekid.appello.R;
+import com.runekid.appello.helper.Block;
 import com.runekid.appello.helper.InputValidation;
 import com.runekid.appello.sql.DBHelper;
 
@@ -52,7 +53,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         getSupportActionBar().hide();
 
+        Block genesisBlock = new Block("Hi im the first block", "0");
+        System.out.println("Hash for block 1 : " + genesisBlock.hash);
 
+        Block secondBlock = new Block("Yo im the second block",genesisBlock.hash);
+        System.out.println("Hash for block 2 : " + secondBlock.hash);
+
+        Block thirdBlock = new Block("Hey im the third block",secondBlock.hash);
+        System.out.println("Hash for block 3 : " + thirdBlock.hash);
 
         initViews();
         initListeners();
