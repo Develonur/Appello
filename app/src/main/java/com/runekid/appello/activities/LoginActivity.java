@@ -75,6 +75,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         getSupportActionBar().hide();
 
+        /*
         //Setup Bouncey castle as a Security Provider
         Security.addProvider(new org.spongycastle.jce.provider.BouncyCastleProvider());
         //Create wallets:
@@ -117,7 +118,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         System.out.println("WalletB's balance is: " + walletB.getBalance());
 
         isChainValid();
-
+        */
 
         initViews();
         initListeners();
@@ -312,10 +313,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         if (!task.isSuccessful()) {
                             Snackbar.make(nestedScrollView,getString(R.string.error_valid_email_password),Snackbar.LENGTH_LONG).show();
                         } else {
-                            Intent accountsIntent = new Intent(activity,UsersActivity.class);
-                            accountsIntent.putExtra("EMAIL",textInputEditTextEmail.getText().toString().trim());
+                            Intent profileIntent = new Intent(activity,ProfileActivity.class);
+                            profileIntent.putExtra("EMAIL",textInputEditTextEmail.getText().toString().trim());
                             emptyInputEditText();
-                            startActivity(accountsIntent);
+                            startActivity(profileIntent);
                         }
 
                         // ...
